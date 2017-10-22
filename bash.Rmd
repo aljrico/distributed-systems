@@ -1,0 +1,66 @@
+---
+title: "Simple commands using bash"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+Read Authors
+```{bash}
+grep -i -n Article data/articles-large.csv | cut -d ',' -f3 | sort | uniq -c
+echo
+```
+
+Unique Authors
+```{bash}
+cut data/articles-large.csv -d ',' -f3 | grep -v "Author" | grep . | sort | uniq -c | wc -l
+´´´
+
+List of January 20 articles
+```{bash}
+grep -i "20 Jan 2017" articles-large.csv | cut -d ',' -f3,8
+```
+
+
+What plants systems contain a Smell Gene (loser way)
+```{bash}
+for filename in $( ls *.genes)
+do cat $filename >> total.genes
+done
+```
+
+What plants systems contain a Smell Gene (best way)
+```{bash}
+grep -l "Smell" *.genes
+```
+
+How many plant systems contain a Color gene?
+```{bash}
+grep -l "Color" *.genes | wc -l
+```
+What genes have in common between apple and pear
+```{bash}
+cat apple.genes pear.genes | cut -f2 | sort | uniq -d
+```
+
+What genes have in common between all plants
+```{bash}
+cat *.genes | cut -f2 | sort | uniq -d
+```
+
+How many genes have in common between all plants
+```{bash}
+cat *.genes | cut -f2 | sort | uniq -c -d
+```
+
+How many genes have in common between all plants
+```{bash}
+cat apple.genes | cut -f2 | sort | uniq >> apple_uniq.genes
+cat pear.genes | cut -f2 | sort | uniq >> pear_uniq.genes
+cat peach.genes | cut -f2 | sort | uniq >> peach_uniq.genes
+
+cat apple_uniq.genes pear_uniq.genes | sort | uniq -d >> apple_pear.genes
+cat apple_pear.genes peach_uniq.genes | sort | uniq -d
+
+```
