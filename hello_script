@@ -1,0 +1,4 @@
+#!/bin/bash
+firstArg=$1
+secondArg=$2
+echo "You have entered \"$firstArg\" and \"$secondArg\""
