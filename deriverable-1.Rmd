@@ -68,13 +68,14 @@ awk '{print $11}' example.bed | head | sed "s/,$//" | awk '{m=$1; for (i=1; i<=N
 ```{bash}
 cd data
 awk '{print $11}' example.bed | sed "s/,$//" | awk '{m=$1; for (i=1; i<=NF; i++) if ($i<m) m = $i; print m}' FS="," > tmpfile;
-paste tmpfile example.bed | sort -n 2>/dev/null | head
+paste tmpfile example.bed | sort -n 2>/dev/null | head;
+rm tmpfile
 ```
 ### Q9: Now get the 10 largest exons of chr1 stored in example.bed
 
 ```{bash}
 cd data
-awk '{print $11}' example.bed | sed "s/,$//" | awk '{m=$1; for (i=1; i<=NF; i++) if ($i<m) m = $i; print m}' FS="," > tmpfile;
+awk '{print $11}' example.bed | sed "s/,$//" | awk '{m=$1; for (i=1; i<=NF; i++) if ($i>m) m = $i; print m}' FS="," > tmpfile;
 paste tmpfile example.bed | sort -nr 2>/dev/null | awk '{if ($2 == "chr1") print $0}' | head
 ```
 ### Q10: Now modify Q9 script to receive as a parameter the number of exons to search for
