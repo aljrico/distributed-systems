@@ -1,0 +1,122 @@
+---
+title: 'Parallel and Distributed Systems: Deliverable 1'
+output:
+  html_document:
+    df_print: paged
+---
+
+
+### Q1: Take a look at the last 10 lines of the file. Which command  are you goint to use? Modify the command to show just the last  line of the file.
+
+```{bash}
+cd data
+head jan2017articles.csv
+```
+
+```{bash}
+cd data
+head example.bed
+```
+
+
+### Q2: Extract all lines that belong to January 6th from the file and store them in a new file named *"reyes.csv"*. Check that the first line of the new file has the expected values.
+
+```{bash}
+cd data
+awk '{ if ($1 == "06" && $2 == "Jan") { print $0} }' jan2017articles.csv > reyes.csv
+```
+
+### Q3: Use the original csv to find which entries have 0 at the comment count only for those enteries from january 25th.
+
+```{bash}
+cd data
+awk '{gsub(", ", " "); if ($5 == "0" && $1 == "25 Jan 2017") print $0}' FS="," jan2017articles.csv
+```
+
+### Q4: Now count the number of entries of Q3 and compare with the total number of entries
+
+```{bash}
+cd data
+awk '{gsub(", ", " "); if ($5 == "0" && $1 == "25 Jan 2017") print $0}' FS="," jan2017articles.csv | wc -l
+
+cat jan2017articles.csv | tail -n +2 | wc -l
+```
+
+### Q5: Now use example.bed file. In this file, we are interested in the exon sizes of each entry. They are located in field number 11. Now you have to get the exon sizes of the first 10 entries of the file.
+
+```{bash}
+cd data
+awk '{print $11}' example.bed | head
+```
+
+### Q6: How would you remove the last comma?
+
+```{bash}
+cd data
+awk '{print $11}' example.bed | head | sed "s/,$//"
+```
+
+### Q7: How would you get the smallest size from each of the records? The result should provide a number for each line of the input
+
+
+```{bash}
+cd data
+awk '{print $11}' example.bed | head | sed "s/,$//" | awk '{m=$1; for (i=1; i<=NF; i++) if ($i<m) m = $i; print m}' FS=","
+```
+### Q8: How would you now sort the records so that the first number shown is the smallest exon size? Again, the answer must provide a sorted list of numbers for each line of the input
+
+```{bash}
+cd data
+awk '{print $11}' example.bed | sed "s/,$//" | awk '{m=$1; for (i=1; i<=NF; i++) if ($i<m) m = $i; print m}' FS="," > tmpfile;
+paste tmpfile example.bed | sort -n 2>/dev/null | head
+```
+### Q9: Now get the 10 largest exons of chr1 stored in example.bed
+
+```{bash}
+cd data
+awk '{print $11}' example.bed | sed "s/,$//" | awk '{m=$1; for (i=1; i<=NF; i++) if ($i<m) m = $i; print m}' FS="," > tmpfile;
+paste tmpfile example.bed | sort -nr 2>/dev/null | awk '{if ($2 == "chr1") print $0}' | head
+```
+### Q10: Now modify Q9 script to receive as a parameter the number of exons to search for
+
+```{bash}
+cd data
+N=$1
+awk '{print $11}' example.bed | sed "s/,$//" | awk '{m=$1; for (i=1; i<=NF; i++) if ($i<m) m = $i; print m}' FS="," > tmpfile;
+paste tmpfile example.bed | sort -nr 2>/dev/null | awk '{if ($2 == "chr1") print $1}' | head -n $N
+```
+
+### Q11: Get the first 10 records of jan2017articles.csv with largest number of comments from the original csv file
+
+```{bash}
+cd data
+awk '{print $5}' FS="," jan2017articles.csv> tmpfile;
+paste tmpfile jan2017articles.csv | sort -nr 2>/dev/null | head 
+```
+
+### Q12: Modify your previouis script to receive a number as a parameter N and then show the top N entries with more comments
+```{bash}
+cd data
+N=$1
+awk '{print $5}' FS="," jan2017articles.csv> tmpfile;
+paste tmpfile jan2017articles.csv | sort -nr 2>/dev/null | head -n $N
+```
+
+### Q13: Now we are going to create a new articles.csv where we get a different output data layout using awk tool INPUT: Post date,Content type,Author,Title,Comm count,Path,Tags,Word count OUTPUT: Title;Comment count;Word count;Post date
+
+```{bash}
+cd data
+awk '{gsub(", ", " "); print $4}' FS="," jan2017articles.csv > tmpfile1;
+awk '{gsub(", ", " "); print $5}' FS="," jan2017articles.csv > tmpfile2;
+awk '{gsub(", ", " "); print $8}' FS="," jan2017articles.csv > tmpfile3;
+awk '{gsub(", ", " "); print $1}' FS="," jan2017articles.csv > tmpfile4;
+paste -d ";" tmpfile1 tmpfile2 tmpfile3 tmpfile4 > articles.csv
+```
+
+### Q14: Now create a new article2.csv format where we cut the Title text to 10 characters and we get only the last level of the Path.
+
+```{bash}
+cd data
+awk '{$1 = substr($1, 1, 10); print $0 }' FS=";" OFS=";" articles.csv | head
+```
+
