@@ -1,0 +1,25 @@
+---
+title: "Introduction to Relational Databases"
+output: html_notebook
+---
+
+# What is a database?
+
+A database is an organized collection of data.[1] A relational database, on the other hand, is a collection of schemas, tables, queries, reports, views, and other elements.
+
+A database is not only a content, but a method too. A database contains data and a service.
+
+* A collection of data
+* A set of rules to manipulate data
+* A method to mold information into knowledge
+* Provide means of consistently extracting knowledge from data
+* Solution to manipulate large data sets efficiently
+* Can integrate  multiple data sources
+
+Is not only about the data, but its structure.
+
+# Flat files vs relational DB
+
+
+
+
