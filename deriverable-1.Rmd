@@ -1,17 +1,27 @@
 ---
-title: 'Parallel and Distributed Systems: Deliverable 1'
+title: 'PDS: Module I - Linux Scripting'
+subtitle: 'Delivery 1: Linux Lab Exercises'
+author: "Alejandro Jiménez Rico"
+date: "3 November 2017"
 output:
+  pdf_document:
+    toc: no
   html_notebook:
     highlight: pygments
     theme: cosmo
-    toc: no
-  pdf_document:
     toc: no
   html_document:
     df_print: paged
     toc: no
 ---
 
+## It is worth noting that
+
+* Files used: `jan2017articles.csv` and `examples.bed`.
+
+* The field `Title` is formatted inconsistenly with the file. Whereas the whole file `jan2017articles.csv` uses a single comma (`,`) as field separator, this field contains commas and spaces together in its value (`", "`). It seems that removing this *comma and space* part of every `Title` does not muddle its information, so we decided to substitute the *comma and space* (`", "`) with a single space, using `gsub(", ", " ")`. This procedure can be found in **Q3**, **Q4**, **Q11** and **Q13**.
+
+* There was one row when this substitution was not useful. There was one column separated not by a comma (`,`) but by a comma and space (`", "`). Knowing that this was just happenning in one row, it seemed reasonable to fix it manually. So it must be taken into account that the file is slightly edited.
 
 ### Q1
 **Take a look at the last 10 lines of the file. Which command  are you goint to use? Modify the command to show just the last  line of the file.**
@@ -48,7 +58,6 @@ awk '{gsub(", ", " "); if ($5 == "0" && $1 == "25 Jan 2017") print $0}' FS="," j
 ```{bash}
 cd data
 awk '{gsub(", ", " "); if ($5 == "0" && $1 == "25 Jan 2017") print $0}' FS="," jan2017articles.csv | wc -l
-
 cat jan2017articles.csv | tail -n +2 | wc -l
 ```
 
@@ -96,7 +105,7 @@ paste tmpfile example.bed | sort -nr 2>/dev/null | awk '{if ($2 == "chr1") print
 ### Q10
 **Now modify Q9 script to receive as a parameter the number of exons to search for.**
 
-`.Rmd` notebook files do not accept arguments as inputs in its scripts. So we just paste the code without computing it.
+Note that `.Rmd` notebook files do not accept arguments as inputs in its scripts. So we just paste the code without computing it.
 ```{bash, eval=FALSE}
 cd data
 N=$1
@@ -109,16 +118,18 @@ paste tmpfile example.bed | sort -nr 2>/dev/null | awk '{if ($2 == "chr1") print
 
 ```{bash}
 cd data
-awk '{print $5}' FS="," jan2017articles.csv> tmpfile;
+awk 'gsub(", ", " ");{print $5}' FS="," jan2017articles.csv> tmpfile;
 paste tmpfile jan2017articles.csv | sort -nr 2>/dev/null | head 
 ```
 
 ### Q12
 **Modify your previouis script to receive a number as a parameter N and then show the top N entries with more comments.**
-```{bash}
+
+Note that `.Rmd` notebook files do not accept arguments as inputs in its scripts. So we just paste the code without computing it.
+```{bash, eval=FALSE}
 cd data
 N=$1
-awk '{print $5}' FS="," jan2017articles.csv> tmpfile;
+awk 'gsub(", ", " ");{print $5}' FS="," jan2017articles.csv> tmpfile;
 paste tmpfile jan2017articles.csv | sort -nr 2>/dev/null | head -n $N
 ```
 
