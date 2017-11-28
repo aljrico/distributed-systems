@@ -1,0 +1,100 @@
+############# DISTRIBUTED SYSTEMS ################
+############### DELIVERY - SQL #####################
+
+
+
+## Q1
+
+To select all features (columns) from the table named 'Sources'.
+
+
+## Q2
+
+SELECT * FROM Descriptions LIMIT 5;
+
++--------+-------------------------------------------+
+| gbId   | description                               |
++--------+-------------------------------------------+
+| A00142 | granulysin                                |
+| A00146 | lypase, gastric                           |
+| A03911 | seryne (or cysteine) proteinase inhibitor |
+| A06977 | albumin                                   |
+| A12027 | S100 calcium binding protein A8           |
++--------+-------------------------------------------+
+
+
+## Q3
+
+To sum all rows from the table named 'LocusLinks'.
+
+## Q4
+
+SELECT COUNT(DISTINCT(affyId)) FROM Data;
+
++-------------------------+
+| COUNT(DISTINCT(affyId)) |
++-------------------------+
+|                      23 |
++-------------------------+
+
+
+## Q5
+
+SELECT * FROM Data WHERE affyId = "U95-32123_at" AND exptId = "1;
+
++--------------+--------+-------+
+| affyId       | exptId | level |
++--------------+--------+-------+
+| U95-32123_at | 1      |   128 |
++--------------+--------+-------+
+
+
+
+## Q6
+
+SELECT * FROM Descriptions WHERE description LIKE "%human%";
+
++--------+---------------------------------------------------------+
+| gbId   | description                                             |
++--------+---------------------------------------------------------+
+| A12345 | HSLFBPS7 Human fructose-1, 6-biphosphatase              |
+| A12346 | HSU30872 Human mitosin mRNA                             |
+| A12347 | HSU33052 Human lipid-activated protein kinase           |
+| A12348 | HSU33053 Human lipid-activated protein kinase           |
+| A12349 | Human clone lambda 5 semaphorin mRNA                    |
+| A22124 | Human rearranged immunoglobulin lambda light chain mRNA |
+| A22127 | Human rearranged immunoglobulin lambda light chain mRNA |
++--------+---------------------------------------------------------+
+
+## Q7
+
+SELECT * FROM GO_Descr WHERE description LIKE "%protein kinase%" ORDER BY goAcc ASC;
+
++---------+----------------+
+| goAcc   | description    |
++---------+----------------+
+| 0001236 | protein kinase |
+| 0001237 | protein kinase |
+| 1112222 | protein kinase |
+| 4442222 | protein kinase |
++---------+----------------+
+
+## Q8
+
+SELECT exptId, AVG(level) FROM Data GROUP BY exptId;
+
++--------+------------+
+| exptId | AVG(level) |
++--------+------------+
+| 1      |   125.3333 |
+| 2      |    95.3333 |
+| 3      |   126.3333 |
+| 4      |    83.5000 |
+| 5      |    92.7500 |
+| 6      |    18.3333 |
+| 7      |    20.0000 |
+| 8      |    40.0000 |
+| 9      |    20.0000 |
++--------+------------+
+
+
