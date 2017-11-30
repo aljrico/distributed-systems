@@ -1,0 +1,473 @@
+---
+title: "Delivery 2"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Q0
+
+**Can you describe the series of steps to open a database for querying?**
+
+Basically, we initialise the terminal on the service we are using, in this case *MariaDB*.
+
+```{bash, eval=FALSE}
+sudo systemctl start mariadb.service
+mysql -u root -p
+```
+
+And then we just open the database:
+
+```{sql, eval=FALSE}
+use experiments;
+```
+
+
+# Q1
+
+**What is the purpose of this query?** 
+```{sql, eval=FALSE}
+SELECT * 
+FROM Sources;
+```
+
+
+
+Basically you are selecting **all** features (columns) from the table named *Sources*.
+
+# Q2
+
+**Get 5 GenBank ids and corresponding descriptions**
+
+Code:
+
+```{sql, eval=FALSE}
+SELECT * 
+FROM Descriptions LIMIT 5;
+```
+
+Output:
+
+```{sql, eval=FALSE}
++--------+-------------------------------------------+
+| gbId   | description                               |
++--------+-------------------------------------------+
+| A00142 | granulysin                                |
+| A00146 | lypase, gastric                           |
+| A03911 | seryne (or cysteine) proteinase inhibitor |
+| A06977 | albumin                                   |
+| A12027 | S100 calcium binding protein A8           |
++--------+-------------------------------------------+
+```
+
+# Q3
+
+** What is the purpose of this query?**
+```{sql, eval=FALSE}
+SELECT COUNT(*) 
+FROM LocusLinks;
+```
+
+The purpose is to sum all rows from the table named *LocusLinks*.
+
+# Q4
+
+**How many different Affy Ids are in the expression data?**
+
+Code: 
+```{sql, eval=FALSE}
+SELECT COUNT(DISTINCT(affyId)) 
+FROM Data;
+```
+
+Output:
+
+```{sql, eval=FALSE}
++-------------------------+
+| COUNT(DISTINCT(affyId)) |
++-------------------------+
+|                      23 |
++-------------------------+
+```
+
+# Q5
+
+**What is the expression level of Affy Id U95-32123_at in experiment number 1?**
+
+Code:
+```{sql, eval=FALSE}
+SELECT * 
+FROM Data 
+WHERE affyId = "U95-32123_at" AND exptId = "1;
+```
+
+Output:
+```{sql, eval=FALSE}
++--------------+--------+-------+
+| affyId       | exptId | level |
++--------------+--------+-------+
+| U95-32123_at | 1      |   128 |
++--------------+--------+-------+
+```
+
+
+# Q6
+
+**Find all the gene descriptions, along with their GenBank Ids containing the word "Human"?**
+
+Code:
+```{sql, eval=FALSE}
+SELECT * 
+FROM Descriptions 
+WHERE description LIKE "%human%";
+```
+
+Output:
+```{sql, eval=FALSE}
++--------+---------------------------------------------------------+
+| gbId   | description                                             |
++--------+---------------------------------------------------------+
+| A12345 | HSLFBPS7 Human fructose-1, 6-biphosphatase              |
+| A12346 | HSU30872 Human mitosin mRNA                             |
+| A12347 | HSU33052 Human lipid-activated protein kinase           |
+| A12348 | HSU33053 Human lipid-activated protein kinase           |
+| A12349 | Human clone lambda 5 semaphorin mRNA                    |
+| A22124 | Human rearranged immunoglobulin lambda light chain mRNA |
+| A22127 | Human rearranged immunoglobulin lambda light chain mRNA |
++--------+---------------------------------------------------------+
+```
+
+# Q7
+
+**What Gene Ontology descriptions (and corresponding accession) contain the phrase "protein kinase"?** Answer should be provided in ascending order of accessions.
+
+Code:
+```{sql, eval=FALSE}
+SELECT * 
+FROM GO_Descr 
+WHERE description LIKE "%protein kinase%" 
+ORDER BY goAcc ASC;
+```
+Output:
+```{sql, eval=FALSE}
++---------+----------------+
+| goAcc   | description    |
++---------+----------------+
+| 0001236 | protein kinase |
+| 0001237 | protein kinase |
+| 1112222 | protein kinase |
+| 4442222 | protein kinase |
++---------+----------------+
+```
+
+# Q8
+
+**Which AffyId of table Data correspond to sequences in Targets table with the phrase 'kinase' in their description?**
+
+
+
+Code:
+```{sql, eval = FALSE}
+SELECT Data.affyId 
+FROM Targets, Descriptions, Data 
+WHERE Descriptions.gbId = Targets.gbId AND Descriptions.description 
+LIKE "%kinase%" AND Data.affyId = Targets.affyId;
+```
+
+In this question I have found something weird. There is no match that satisfies our query.
+
+Output:
+```{sql, eval=FALSE}
+Empty set (0.00 sec)
+```
+
+Why is this happenning? A fast to check it is to query the data present just on the *Targets* table.
+
+In:
+```{sql, eval = FALSE}
+SELECT Targets.affyId 
+FROM Targets, Descriptions 
+WHERE Descriptions.gbId = Targets.gbId AND Descriptions.description 
+LIKE "%KINASE%";
+```
+
+Out:
+```{sql, eval = FALSE}
++---------+
+| affyId  |
++---------+
+| 3159_at |
+| 3160_at |
++---------+
+```
+
+These are the only `affyId` satisfying our conditions present in the `Targets` table. And is easy to notice that these values do not appear on the `Data` table.
+
+In:
+```{sql, eval = FALSE}
+SELECT *
+FROM Data;
+```
+
+Out:
+```{sql, eval = FALSE}
++---------------------------+--------+-------+
+| affyId                    | exptId | level |
++---------------------------+--------+-------+
+| 31315_at                  | 3      |   250 |
+| 31324_at                  | 3      |    91 |
+| 31325_at                  | 1      |   191 |
+| 31325_at                  | 2      |   101 |
+| 31325_at                  | 4      |    51 |
+| 31325_at                  | 5      |    71 |
+| 31325_at                  | 6      |    31 |
+| 31356_at                  | 3      |    91 |
+| 31362_at                  | 3      |   260 |
+| 31510_s_at                | 3      |   257 |
+| 5321_at                   | 4      |    90 |
+| 5322_at                   | 4      |    90 |
+| 5323_at                   | 4      |    90 |
+| 5324_at                   | 3      |    57 |
+| 5324_at                   | 4      |    90 |
+| 5325_at                   | 4      |    90 |
+| AFFX-BioB-3_at            | 3      |    97 |
+| AFFX-BioB-5_at            | 3      |    20 |
+| AFFX-BioB-M_at            | 3      |    20 |
+| AFFX-BioB-M_at            | 5      |   214 |
+| AFFX-BioB-M_at            | 7      |    20 |
+| AFFX-BioB-M_at            | 8      |    40 |
+| AFFX-BioB-M_at            | 9      |    20 |
+| AFFX-HSAC07/X00351_M_at   | 3      |    86 |
+| AFFX-HUMBAPDH/M33197_3_st | 3      |   277 |
+| AFFX-HUMTFFR/M11507_at    | 3      |    90 |
+| AFFX-M27830_3_at          | 3      |   271 |
+| AFFX-MurIL10_at           | 3      |     8 |
+| AFFX-MurIL10_at           | 5      |     8 |
+| AFFX-MurIL10_at           | 6      |     4 |
+| AFFX-MurIL2_at            | 3      |    20 |
+| AFFX-MurIL4_at            | 5      |    78 |
+| AFFX-MurIL4_at            | 6      |    20 |
+| U95-32123_at              | 1      |   128 |
+| U95-32123_at              | 2      |   128 |
+| U98-40474_at              | 1      |    57 |
+| U98-40474_at              | 2      |    57 |
++---------------------------+--------+-------+
+```
+
+What can we do abut it? In order to properly practice this kind of queries, one possible solution is to manually import a csv where there is a new entry that satisfies the conditions.
+
+In:
+```{sql, eval = FALSE}
+LOAD DATA INFILE 'file.tsv' INTO TABLE Descriptions;
+```
+
+And repeat the query:
+
+In:
+```{sql, eval = FALSE}
+SELECT Data.affyId 
+FROM Targets, Descriptions, Data 
+WHERE Descriptions.gbId = Targets.gbId AND Descriptions.description 
+LIKE "%kinase%" AND Data.affyId = Targets.affyId;
+```
+
+But all of this, at the end it doesn't even matter; because there is a missmatch between the format between some of the tables and others. 
+
+For instance, in this `affyId` we find that in one table has this format: `U95_32123_at` and in  other talbe has this other format: `U95-32123_at`. Subtle, but crucial difference.
+
+This point here is of extreme importance for the development of the whole assignment, for all queries can be affected of this situation.
+
+
+## Q9
+
+**Get two `affyId`, `uId` and `description` in `LocusDescr` in reverse alphabetical order of descriptions.**
+
+In:
+```{sql, eval = FALSE}
+SELECT Targets.affyId, UniSeqs.uId, LocusDescr.description
+FROM Targets, UniSeqs, LocusDescr, LocusLinks
+WHERE LocusLinks.linkId = LocusDescr.linkId
+AND LocusLinks.gbId = UniSeqs.gbId
+AND Targets.gbId = LocusLinks.gbId
+ORDER BY LocusDescr.description DESC
+LIMIT 2
+;
+```
+
+Out:
+```{sql, eval = FALSE}
++--------------+--------+-------------+
+| affyId       | uId    | description |
++--------------+--------+-------------+
+| U95_32123_at | Hs1640 | Collagen    |
+| U95_40474_at | Hs1691 | Glucan      |
++--------------+--------+-------------+
+```
+
+### Q10:
+**How would you find the average expression level of each experiment in Data?**
+
+In:
+```{sql, eval = FALSE}
+SELECT exptId, AVG(level) FROM Data GROUP BY exptId;
+```
+
+Out:
+```{sql, eval = FALSE}
+
++--------+------------+
+| exptId | AVG(level) |
++--------+------------+
+| 1      |   125.3333 |
+| 2      |    95.3333 |
+| 3      |   126.3333 |
+| 4      |    83.5000 |
+| 5      |    92.7500 |
+| 6      |    18.3333 |
+| 7      |    20.0000 |
+| 8      |    40.0000 |
+| 9      |    20.0000 |
++--------+------------+
+```
+
+### Q11:
+
+**What is the average expression level of each array probe (`affyId`) across all experiments?**
+
+In:
+```{sql, eval = FALSE}
+SELECT affyId, AVG(level) FROM Data GROUP BY affyId;
+```
+
+Out:
+```{sql, eval=FALSE}
++---------------------------+------------+
+| affyId                    | AVG(level) |
++---------------------------+------------+
+| 31315_at                  |   250.0000 |
+| 31324_at                  |    91.0000 |
+| 31325_at                  |    89.0000 |
+| 31356_at                  |    91.0000 |
+| 31362_at                  |   260.0000 |
+| 31510_s_at                |   257.0000 |
+| 5321_at                   |    90.0000 |
+| 5322_at                   |    90.0000 |
+| 5323_at                   |    90.0000 |
+| 5324_at                   |    73.5000 |
+| 5325_at                   |    90.0000 |
+| AFFX-BioB-3_at            |    97.0000 |
+| AFFX-BioB-5_at            |    20.0000 |
+| AFFX-BioB-M_at            |    62.8000 |
+| AFFX-HSAC07/X00351_M_at   |    86.0000 |
+| AFFX-HUMBAPDH/M33197_3_st |   277.0000 |
+| AFFX-HUMTFFR/M11507_at    |    90.0000 |
+| AFFX-M27830_3_at          |   271.0000 |
+| AFFX-MurIL10_at           |     6.6667 |
+| AFFX-MurIL2_at            |    20.0000 |
+| AFFX-MurIL4_at            |    49.0000 |
+| U95-32123_at              |   128.0000 |
+| U98-40474_at              |    57.0000 |
++---------------------------+------------+
+```
+
+### Q12:
+
+**What is the purpose of the following query?**
+
+```{sql, eval = FALSE}
+SELECT Data.affyId, Data.level, Data.exptId, DataCopy.affyId, DataCopy.level, DataCopy.exptId
+FROM Data, Data DataCopy
+WHERE Data.level > 10 * DataCopy.level
+AND Data.affyId = DataCopy.affyId
+AND Data.affyId LIKE "AFFX%"
+LIMIT 10;
+```
+
+What this query is doing is to make a copy of the `Data` table in order to select those `affyId` whose difference on `level` values from different `expId`s is so huge that one of them is $10$ some of the others. Also, this query lets you look at those `level` and `exptId` where this happens. Moreover, this query filters to those `affyId` that starts with "`AFFX`".
+
+### Q13:
+
+**Write a query to provide three different descriptions for all `gbId` in table `Targets`**
+
+In:
+```{sql, eval = FALSE}
+SELECT Targets.gbId, Descriptions.description, GO_Descr.description, LocusDescr.description 
+FROM Targets, Descriptions, GO_Descr, LocusDescr, Ontologies, LocusLinks 
+WHERE Descriptions.gbId = Targets.gbId 
+AND GO_Descr.goAcc = Ontologies.goAcc 
+AND LocusDescr.linkId = Ontologies.linkId 
+AND Targets.gbId = LocusLinks.gbId;
+```
+
+Out:
+```{sql, eval = FALSE}
++--------+------------------------------------------------------------+--------------+-------------+
+| gbId   | description                                                | description  | description |
++--------+------------------------------------------------------------+--------------+-------------+
+| A00142 | granulysin                                                 | Serine Prot. | Collagen    |
+| A00142 | granulysin                                                 | Serine Prot. | Collagen    |
+| A00146 | lypase, gastric                                            | Serine Prot. | Collagen    |
+| A00146 | lypase, gastric                                            | Serine Prot. | Collagen    |
+| A03911 | seryne (or cysteine) proteinase inhibitor                  | Serine Prot. | Collagen    |
+| A06977 | albumin                                                    | Serine Prot. | Collagen    |
+| A06977 | albumin                                                    | Serine Prot. | Collagen    |
+| A12027 | S100 calcium binding protein A8                            | Serine Prot. | Collagen    |
+| A12027 | S100 calcium binding protein A8                            | Serine Prot. | Collagen    |
+| A12345 | HSLFBPS7 Human fructose-1, 6-biphosphatase                 | Serine Prot. | Collagen    |
+| A12346 | HSU30872 Human mitosin mRNA                                | Serine Prot. | Collagen    |
+| A12347 | HSU33052 Human lipid-activated protein kinase              | Serine Prot. | Collagen    |
+| A12348 | HSU33053 Human lipid-activated protein kinase              | Serine Prot. | Collagen    |
+| A12349 | Human clone lambda 5 semaphorin mRNA                       | Serine Prot. | Collagen    |
+| A22123 | Homo sapiens immunoglobulin lambda locus DNA, clone 288A10 | Serine Prot. | Collagen    |
+| A22124 | Human rearranged immunoglobulin lambda light chain mRNA    | Serine Prot. | Collagen    |
+| A22125 | Homo sapiens immunoglobulin lambda locus DNA, clone 31F3   | Serine Prot. | Collagen    |
+| A22126 | Homo sapiens immunoglobulin lambda locus DNA, clone 288A10 | Serine Prot. | Collagen    |
+| A22127 | Human rearranged immunoglobulin lambda light chain mRNA    | Serine Prot. | Collagen    |
+| S75295 | Glucan                                                     | Serine Prot. | Collagen    |
+| A00142 | granulysin                                                 | Glucan Enz   | Glucan      |
+| A00142 | granulysin                                                 | Glucan Enz   | Glucan      |
+| A00146 | lypase, gastric                                            | Glucan Enz   | Glucan      |
+| A00146 | lypase, gastric                                            | Glucan Enz   | Glucan      |
+| A03911 | seryne (or cysteine) proteinase inhibitor                  | Glucan Enz   | Glucan      |
+| A06977 | albumin                                                    | Glucan Enz   | Glucan      |
+| A06977 | albumin                                                    | Glucan Enz   | Glucan      |
+| A12027 | S100 calcium binding protein A8                            | Glucan Enz   | Glucan      |
+| A12027 | S100 calcium binding protein A8                            | Glucan Enz   | Glucan      |
+| A12345 | HSLFBPS7 Human fructose-1, 6-biphosphatase                 | Glucan Enz   | Glucan      |
+| A12346 | HSU30872 Human mitosin mRNA                                | Glucan Enz   | Glucan      |
+| A12347 | HSU33052 Human lipid-activated protein kinase              | Glucan Enz   | Glucan      |
+| A12348 | HSU33053 Human lipid-activated protein kinase              | Glucan Enz   | Glucan      |
+| A12349 | Human clone lambda 5 semaphorin mRNA                       | Glucan Enz   | Glucan      |
+| A22123 | Homo sapiens immunoglobulin lambda locus DNA, clone 288A10 | Glucan Enz   | Glucan      |
+| A22124 | Human rearranged immunoglobulin lambda light chain mRNA    | Glucan Enz   | Glucan      |
+| A22125 | Homo sapiens immunoglobulin lambda locus DNA, clone 31F3   | Glucan Enz   | Glucan      |
+| A22126 | Homo sapiens immunoglobulin lambda locus DNA, clone 288A10 | Glucan Enz   | Glucan      |
+| A22127 | Human rearranged immunoglobulin lambda light chain mRNA    | Glucan Enz   | Glucan      |
+| S75295 | Glucan                                                     | Glucan Enz   | Glucan      |
++--------+------------------------------------------------------------+--------------+-------------+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

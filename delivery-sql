@@ -81,6 +81,31 @@ SELECT * FROM GO_Descr WHERE description LIKE "%protein kinase%" ORDER BY goAcc 
 
 ## Q8
 
+SELECT Data.affyId FROM Targets, Descriptions, Data WHERE Descriptions.gbId = Targets.gbId AND Descriptions.description LIKE "%kinase%" AND Data.affyId = Targets.affyId;
+
+Empty set (0.00 sec)
+
+# Why is this happenning? If we limit the query to the data present on the 'Targets' table, we see that
+
+SELECT Targets.affyId FROM Targets, Descriptions WHERE Descriptions.gbId = Targets.gbId AND Descriptions.description LIKE "%KINASE%";
+
++---------+
+| affyId  |
++---------+
+| 3159_at |
+| 3160_at |
++---------+
+
+These are the only 'affyId' satisfying our conditions, and these do not appear on 'Data' table.
+
+Now we will add some new entries on 'Targets' table.
+
+
+
+
+
+## Q10
+
 SELECT exptId, AVG(level) FROM Data GROUP BY exptId;
 
 +--------+------------+
